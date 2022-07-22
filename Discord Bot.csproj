@@ -2,6 +2,7 @@
   
   <PropertyGroup>
 	<OutputType>Exe</OutputType>
+	<LangVersion>latest</LangVersion>
 	<TargetFramework>net4.8</TargetFramework>
 	<RootNamespace>User_Secrets</RootNamespace>
 	<UserSecretsId>user-secrets-id</UserSecretsId>
