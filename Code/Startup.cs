@@ -50,7 +50,7 @@ public class Program
 		else
 			lengthOfCommand = message.Content.Length;
 
-		command = message.Content.Substring(1, lengthOfCommand - 1);
+		command = message.Content.Substring(1, lengthOfCommand - 1).ToLower();
 
 		//commands begin here
 		if (command.Equals("hello"))
