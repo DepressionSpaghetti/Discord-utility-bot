@@ -13,6 +13,7 @@ public class Program
 	public async Task MainAsync()
 	{
 		_client = new DiscordSocketClient();
+		_client.MessageReceived += CommandHandler;
 		_client.Log += Log;
 
 		var appConfig = new ConfigurationBuilder().AddUserSecrets<Program>().Build();
@@ -30,5 +31,37 @@ public class Program
 		Console.WriteLine(msg.ToString());
 		return Task.CompletedTask;
 	}
+
+	private Task CommandHandler(SocketMessage message)
+    {
+		string command = "";
+		int lengthOfCommand = -1;
+
+
+		//command filtering
+		if (!message.Content.StartsWith("!")) 
+			return Task.CompletedTask;
+
+		if (message.Author.IsBot)
+			return Task.CompletedTask;
+
+		if (message.Content.Contains(" "))
+			lengthOfCommand = message.Content.IndexOf(" ");
+		else
+			lengthOfCommand = message.Content.Length;
+
+		command = message.Content.Substring(1, lengthOfCommand - 1);
+
+		//commands begin here
+		if (command.Equals("hello"))
+        {
+			message.Channel.SendMessageAsync($@"Hello {message.Author.Mention}");
+
+        }
+
+
+		return Task.CompletedTask;
+    }
+
 
 }
