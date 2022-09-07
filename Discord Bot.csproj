@@ -5,7 +5,7 @@
 	<LangVersion>latest</LangVersion>
 	<TargetFramework>net4.8</TargetFramework>
 	<RootNamespace>User_Secrets</RootNamespace>
-	<UserSecretsId>4157b1b5-55f8-4622-8ab9-02899e870910</UserSecretsId>
+	<UserSecretsId>Your-userSecrets-ID</UserSecretsId>
   </PropertyGroup>
   
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
