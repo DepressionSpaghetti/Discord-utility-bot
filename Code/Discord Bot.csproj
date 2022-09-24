@@ -3,9 +3,7 @@
   <PropertyGroup>
 	<OutputType>Exe</OutputType>
 	<LangVersion>latest</LangVersion>
-	<TargetFramework>net4.8</TargetFramework>
-	<RootNamespace>User_Secrets</RootNamespace>
-	<UserSecretsId>4157b1b5-55f8-4622-8ab9-02899e870910</UserSecretsId>
+	<TargetFramework>net6.0</TargetFramework>
 	<Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
   
@@ -21,6 +19,7 @@
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
+    <UserSecretsId>8a577339-31c5-4780-a93a-154d76af5f2b</UserSecretsId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -65,8 +64,12 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Discord.Net" Version="3.8.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="6.0.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="6.0.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
     <PackageReference Include="System.Runtime" Version="4.3.1" />
   </ItemGroup>
   <ItemGroup>
@@ -133,6 +136,9 @@
     <Reference Include="System.Windows" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Configuration\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
