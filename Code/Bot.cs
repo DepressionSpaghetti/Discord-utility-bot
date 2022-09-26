@@ -10,6 +10,7 @@ using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+
 //general log messages in prompt
 public class LoggingService
  {
@@ -66,16 +67,21 @@ public class LoggingService
 
     async Task RunAsync(string[] args)
     {
-        var client = _services.GetRequiredService<AudioService>();
-        _client = new DiscordSocketClient();
+
+         var client = _services.GetRequiredService<AudioService>();
+         _client = new DiscordSocketClient();
          _commands = new CommandService();
          _commandHandler = new CommandHandler(_client, _commands);
          _client.Log += Log;
          _commands.Log += Log;
 
+
         //gets bot token from JSON file in config
-         var appConfig = new ConfigurationBuilder().AddUserSecrets<Program>().Build();
-         var token = appConfig["DiscordBotToken"];
+        var appConfig = new ConfigurationBuilder()
+            .AddJsonFile($@"config\token.json")
+            .Build();
+        var token = appConfig["DiscordBotToken"];
+
 
         //starts bot
          await _client.LoginAsync(TokenType.Bot, token);
