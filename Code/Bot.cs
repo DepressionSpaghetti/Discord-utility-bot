@@ -5,7 +5,6 @@ using System;
 using System.Threading.Tasks;
 using System.Reflection;
 using System.Linq;
-using Newtonsoft.Json;
 using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,13 +37,13 @@ public class LoggingService
  {
 
     #region private instances
-    private IServiceProvider _services;
+    public IServiceProvider _services;
     private DiscordSocketClient _client;
     private CommandService _commands;
     private CommandHandler _commandHandler;
     #endregion
 
-    //creates service provider instance
+    //creates service provider constructor
     public Program()
     {
         _services = CreateProvider();
@@ -68,10 +67,10 @@ public class LoggingService
     async Task RunAsync(string[] args)
     {
 
-         var client = _services.GetRequiredService<AudioService>();
+        
          _client = new DiscordSocketClient();
          _commands = new CommandService();
-         _commandHandler = new CommandHandler(_client, _commands);
+         _commandHandler = new CommandHandler(_client, _commands, _services);
          _client.Log += Log;
          _commands.Log += Log;
 
@@ -94,14 +93,17 @@ public class LoggingService
 
      public class CommandHandler
      {
+
          private readonly DiscordSocketClient _client;
          private readonly CommandService _commands;
+         private readonly IServiceProvider _services;
 
         // Retrieve client and CommandService instance via ctor
-        public CommandHandler(DiscordSocketClient client, CommandService commands)
+        public CommandHandler(DiscordSocketClient client, CommandService commands, IServiceProvider services)
         {
             _commands = commands;
             _client = client;
+            _services = CreateProvider();
         }
 
         //adds commands from files in Modules folder
@@ -119,7 +121,7 @@ public class LoggingService
             // If you do not use Dependency Injection, pass null.
             // See Dependency Injection guide for more information.
             await _commands.AddModulesAsync(assembly: Assembly.GetEntryAssembly(),
-                                            services: null);
+                                            services: _services);
         }
 
         private async Task HandleCommandAsync(SocketMessage messageParam)
@@ -148,7 +150,7 @@ public class LoggingService
                 services: null);
         }
 
-    }
+     }
 
      //writes log messages to prompt
      private Task Log(LogMessage msg)
