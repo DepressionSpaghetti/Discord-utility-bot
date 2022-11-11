@@ -1,10 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
 	<OutputType>Exe</OutputType>
 	<LangVersion>latest</LangVersion>
 	<TargetFramework>net6.0</TargetFramework>
-	<Platforms>AnyCPU;x64</Platforms>
+  <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
   
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
