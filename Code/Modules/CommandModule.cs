@@ -1,6 +1,7 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using System;
 using System.Threading.Tasks;
 
 namespace DiscordBot
@@ -22,8 +23,16 @@ namespace DiscordBot
         [Summary("Connects to voice channel where the user is")]
         public async Task JoinChnl(IVoiceChannel chnl = null)
         {
-            if (chnl == null) await _service.JoinChannel(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
-            else await _service.JoinChannel(Context.Guild, chnl);
+            try
+            {
+                if (chnl == null) await _service.JoinChannel(Context.Guild, (Context.User as IVoiceState).VoiceChannel);
+                else await _service.JoinChannel(Context.Guild, chnl);
+            }
+            catch(NullReferenceException nullException)
+            {
+                Console.WriteLine("Exception in voice channel connection: " + nullException.Message);
+                await Context.Channel.SendMessageAsync("Command requester isn't connected to any voice channels and hasn't provided any voice channels to connect to.");
+            }
 
         }
 

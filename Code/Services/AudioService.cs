@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -19,7 +20,7 @@ namespace DiscordBot
         }
 
         // Task to join audio channel
-        public async Task JoinChannel(IGuild guild, IVoiceChannel channel)
+        public async Task JoinChannel(IGuild guild, IVoiceChannel channel) 
         {
             // Gets channel ID
             IAudioClient client;
