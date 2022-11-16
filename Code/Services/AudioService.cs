@@ -13,18 +13,16 @@ namespace DiscordBot
     {
         // Makes ConcurrentDictionary to keep tasks across multiple executions
         public readonly ConcurrentDictionary<ulong, IAudioClient> ConnectedChannels = new ConcurrentDictionary<ulong, IAudioClient>();
-        public List<CommandModule> Things { get; }
         public AudioService()
         {
-            Things = new();
+            ConnectedChannels = new();
         }
 
         // Task to join audio channel
         public async Task JoinChannel(IGuild guild, IVoiceChannel channel) 
         {
             // Gets channel ID
-            IAudioClient client;
-            if (ConnectedChannels.TryGetValue(guild.Id, out client))
+            if (ConnectedChannels.TryGetValue(guild.Id, out IAudioClient client))
             {
                 return;
             }
@@ -34,7 +32,9 @@ namespace DiscordBot
             }
 
             // Connects to voice channel
-            var audioClient = await channel.ConnectAsync();
+            await channel.ConnectAsync();
+
+            await Task.Delay(-1);
 
         }
 
@@ -57,8 +57,7 @@ namespace DiscordBot
             }
 
             // Plays given file
-            IAudioClient client;
-            if(ConnectedChannels.TryGetValue(guild.Id, out client))
+            if (ConnectedChannels.TryGetValue(guild.Id, out IAudioClient client))
             {
                 using (var ffmpeg = CreateProcess(path))
                 using (var stream = client.CreatePCMStream(AudioApplication.Music))
