@@ -128,7 +128,7 @@ namespace DiscordBot
                 .AddSingleton<DiscordSocketClient>()
                 .AddSingleton(CommandServiceConfig)
                 .AddSingleton<CommandService>()
-                .AddSingleton(new AudioService());
+                .AddSingleton<AudioService>();
 
             // Builds the service provider
             return collection.BuildServiceProvider();

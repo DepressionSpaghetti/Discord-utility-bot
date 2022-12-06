@@ -1,11 +1,17 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq;
+using Microsoft.Win32;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Audio;
+using CliWrap;
+using YoutubeExplode;
+using YoutubeExplode.Common;
+using YoutubeExplode.Videos.Streams;
+
 
 namespace DiscordBot
 {
@@ -46,7 +52,7 @@ namespace DiscordBot
         }
 
         // Task to play music
-        public async Task SendAudio(IGuild guild, IMessageChannel channel, string path)
+        /*public async Task SendAudio(IGuild guild, IMessageChannel channel, string path)
         {
             // Bot sends message that file doesnt exist
             if(!File.Exists(path))
@@ -68,18 +74,19 @@ namespace DiscordBot
                 }
 
             }
+        }*/
+
+        // Get Youtube metadata stream
+        private async Task CreateProcess()
+        {
+            YoutubeClient youtube = new YoutubeClient();
+            var StreamManifest = await youtube.Videos.Streams.GetManifestAsync("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+            var StreamInfo = await StreamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
+            var stream = youtube.Videos.Streams.GetAsync(StreamInfo);
+
         }
 
-        // Creates ffmpeg process
-        private Process CreateProcess(string path)
-        {
-            return Process.Start(new ProcessStartInfo
-            {
-                FileName = "ffmpeg.exe",
-                Arguments = $"-hide_banner -loglevel panic -i \"{path}\" -ac 2 -f s161e -ar 48000 pipe:1",
-                UseShellExecute = false,
-                RedirectStandardOutput = true
-            });
-        }
+
+       
     }
 }
