@@ -51,38 +51,31 @@ namespace DiscordBot
 
         }
 
-        // Task to play music
-        /*public async Task SendAudio(IGuild guild, IMessageChannel channel, string path)
+
+        // Get Youtube metadata stream and pipes it to the bot
+        private async Task SendAudio(IGuild guild, IMessageChannel channel, string path)
         {
-            // Bot sends message that file doesnt exist
-            if(!File.Exists(path))
-            {
-                await channel.SendMessageAsync("File does not exist");
-                return;
-
-            }
-
-            // Plays given file
-            if (ConnectedChannels.TryGetValue(guild.Id, out IAudioClient client))
-            {
-                using (var ffmpeg = CreateProcess(path))
-                using (var stream = client.CreatePCMStream(AudioApplication.Music))
-                {
-                    try { await ffmpeg.StandardOutput.BaseStream.CopyToAsync(stream); }
-                    finally { await stream.FlushAsync(); }
-
-                }
-
-            }
-        }*/
-
-        // Get Youtube metadata stream
-        private async Task CreateProcess()
-        {
+            // Get Youtube audio stream
             YoutubeClient youtube = new YoutubeClient();
-            var StreamManifest = await youtube.Videos.Streams.GetManifestAsync("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
-            var StreamInfo = await StreamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
-            var stream = youtube.Videos.Streams.GetAsync(StreamInfo);
+            var streamManifest = await youtube.Videos.Streams.GetManifestAsync("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+            var streamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
+            var stream = await youtube.Videos.Streams.GetAsync(streamInfo);
+
+            // Pipe it to discord
+            MemoryStream memoryStream = new MemoryStream();
+            await Cli.Wrap("ffmpeg")
+                .WithArguments(" -hide_banner -loglevel panic -i pipe:0 -ac 2 -f s16le -ar 48000 pipe:1")
+                .WithStandardInputPipe(PipeSource.FromStream(stream))
+                .WithStandardOutputPipe(PipeTarget.ToStream(memoryStream))
+                .ExecuteAsync();
+
+            // Play it
+            using (var discord = AudioClient.CreatePCMStream(AudioApplication.Mixed))
+            {
+                try { await AudioClient.WriteAsync(memoryStream.ToArray(), 0, (int)memoryStream.Length); }
+                finally { await AudioClient.FlushAsync(); }
+            }
+
 
         }
 

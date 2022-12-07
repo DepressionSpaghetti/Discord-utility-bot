@@ -57,17 +57,23 @@ namespace DiscordBot
 
         }
     
-    /*
+    
         // play audio command
         [Command("play", RunMode = RunMode.Async)]
         [Summary("Plays audio to connected chanel")]
         public async Task PlayAudio([Remainder] string song)
         {
-            await JoinChnl();
+            try { await JoinChnl(); }
+            catch(NullReferenceException nullException)
+            {
+                Console.WriteLine("Exception in voice channel connection: " + nullException.Message);
+                await Context.Channel.SendMessageAsync("Command requester isn't connected to any voice channels.");
+            }
+            
 
-            await _service.SendAudio(Context.Guild, Context.Channel, song);
+            //await _service.SendAudio(Context.Guild, Context.Channel, song);
 
-        }*/
+        }
     
     }
 }
