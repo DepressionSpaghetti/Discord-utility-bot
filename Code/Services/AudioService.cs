@@ -11,7 +11,8 @@ using CliWrap;
 using YoutubeExplode;
 using YoutubeExplode.Common;
 using YoutubeExplode.Videos.Streams;
-
+using Discord.Audio.Streams;
+using System.Runtime.Remoting.Contexts;
 
 namespace DiscordBot
 {
@@ -24,11 +25,13 @@ namespace DiscordBot
             ConnectedChannels = new();
         }
 
+        public static IAudioClient client;
+
         // Task to join audio channel
         public async Task JoinChannel(IGuild guild, IVoiceChannel channel) 
         {
             // Gets channel ID
-            if (ConnectedChannels.TryGetValue(guild.Id, out IAudioClient client))
+            if (ConnectedChannels.TryGetValue(guild.Id, out client))
             {
                 return;
             }
@@ -38,9 +41,7 @@ namespace DiscordBot
             }
 
             // Connects to voice channel
-            await channel.ConnectAsync();
-
-            await Task.Delay(-1);
+            client = await channel.ConnectAsync();
 
         }
 
@@ -51,10 +52,11 @@ namespace DiscordBot
 
         }
 
-
         // Get Youtube metadata stream and pipes it to the bot
-        private async Task SendAudio(IGuild guild, IMessageChannel channel, string path)
+        public async Task SendAudio(string videoLink)
         {
+
+
             // Get Youtube audio stream
             YoutubeClient youtube = new YoutubeClient();
             var streamManifest = await youtube.Videos.Streams.GetManifestAsync("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
@@ -63,17 +65,17 @@ namespace DiscordBot
 
             // Pipe it to discord
             MemoryStream memoryStream = new MemoryStream();
-            await Cli.Wrap("ffmpeg")
+            await Cli.Wrap(@"ffmpeg\ffmpeg.exe")
                 .WithArguments(" -hide_banner -loglevel panic -i pipe:0 -ac 2 -f s16le -ar 48000 pipe:1")
                 .WithStandardInputPipe(PipeSource.FromStream(stream))
                 .WithStandardOutputPipe(PipeTarget.ToStream(memoryStream))
                 .ExecuteAsync();
 
             // Play it
-            using (var discord = AudioClient.CreatePCMStream(AudioApplication.Mixed))
+            using (var discord = client.CreatePCMStream(AudioApplication.Mixed))
             {
-                try { await AudioClient.WriteAsync(memoryStream.ToArray(), 0, (int)memoryStream.Length); }
-                finally { await AudioClient.FlushAsync(); }
+                try { await discord.WriteAsync(memoryStream.ToArray(), 0, (int)memoryStream.Length); }
+                finally { await discord.FlushAsync(); }
             }
 
 

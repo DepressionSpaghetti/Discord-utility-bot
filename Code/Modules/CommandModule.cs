@@ -1,22 +1,24 @@
-﻿using Discord;
+﻿using AngleSharp.Html.Dom;
+using Discord;
+using Discord.Audio;
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
+using System.Runtime.Remoting.Contexts;
 using System.Threading.Tasks;
 
 namespace DiscordBot
 {
     public class CommandModule : ModuleBase<SocketCommandContext>
     {
-
+        #region Service injection
         // Injects the audio service
         private readonly AudioService _service;
-    
         public CommandModule(AudioService service)
         {
             _service = service;
         }
-
+        #endregion
 
         // Connects bot to voice channel
         [Command("connect", RunMode = RunMode.Async)]
@@ -61,17 +63,12 @@ namespace DiscordBot
         // play audio command
         [Command("play", RunMode = RunMode.Async)]
         [Summary("Plays audio to connected chanel")]
-        public async Task PlayAudio([Remainder] string song)
+        public async Task PlayMusic([Remainder] string song)
         {
-            try { await JoinChnl(); }
-            catch(NullReferenceException nullException)
-            {
-                Console.WriteLine("Exception in voice channel connection: " + nullException.Message);
-                await Context.Channel.SendMessageAsync("Command requester isn't connected to any voice channels.");
-            }
-            
+            var chnl = Context.Guild.CurrentUser.VoiceChannel;
+            if (chnl == null) await JoinChnl();
 
-            //await _service.SendAudio(Context.Guild, Context.Channel, song);
+            await _service.SendAudio(song);
 
         }
     
