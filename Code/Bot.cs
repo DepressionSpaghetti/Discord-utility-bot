@@ -151,7 +151,7 @@ namespace DiscordBot
 
             // Gets bot token from JSON file
             var appConfig = new ConfigurationBuilder()
-                .AddJsonFile($@"config\token.json")
+                .AddJsonFile($@"config\credentials.json")
                 .Build();
             var token = appConfig["DiscordBotToken"];
 

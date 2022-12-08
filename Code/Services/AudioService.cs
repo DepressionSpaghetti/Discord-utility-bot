@@ -1,18 +1,16 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Linq;
-using Microsoft.Win32;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Audio;
 using CliWrap;
 using YoutubeExplode;
-using YoutubeExplode.Common;
 using YoutubeExplode.Videos.Streams;
-using Discord.Audio.Streams;
-using System.Runtime.Remoting.Contexts;
+using System.Net.Http;
+using YoutubeSearchApi.Net.Models.Youtube;
+using YoutubeSearchApi.Net.Services;
+
 
 namespace DiscordBot
 {
@@ -52,11 +50,23 @@ namespace DiscordBot
 
         }
 
-        // Get Youtube metadata stream and pipes it to the bot
-        public async Task SendAudio(string videoLink)
+        public async Task PlayAudio()
         {
+            MemoryStream memoryStream = await GetAudio();
+
+            // Play audio
+            using (var discord = client.CreatePCMStream(AudioApplication.Mixed))
+            {
+                try { await discord.WriteAsync(memoryStream.ToArray(), 0, (int)memoryStream.Length); }
+                finally { await discord.FlushAsync(); }
+            }
+        }
 
 
+
+        // Get Youtube metadata stream and pipes it to the bot
+        public async Task<MemoryStream> GetAudio(/*string videoLink*/)
+        {
             // Get Youtube audio stream
             YoutubeClient youtube = new YoutubeClient();
             var streamManifest = await youtube.Videos.Streams.GetManifestAsync("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
@@ -71,16 +81,24 @@ namespace DiscordBot
                 .WithStandardOutputPipe(PipeTarget.ToStream(memoryStream))
                 .ExecuteAsync();
 
-            // Play it
-            using (var discord = client.CreatePCMStream(AudioApplication.Mixed))
-            {
-                try { await discord.WriteAsync(memoryStream.ToArray(), 0, (int)memoryStream.Length); }
-                finally { await discord.FlushAsync(); }
-            }
-
-
+            return memoryStream;
         }
 
+        public async Task SearchMusic()
+        {
+
+            using (var httpClient = new HttpClient())
+            {
+                YoutubeSearchClient client = new YoutubeSearchClient(httpClient);
+                var responseObject = await client.SearchAsync("Never gonna give you up");
+                foreach (YoutubeVideo video in responseObject.Results)
+                {
+                    Console.WriteLine(video.Url);
+                    Console.WriteLine("");
+                }
+            }
+
+        }
 
        
     }
