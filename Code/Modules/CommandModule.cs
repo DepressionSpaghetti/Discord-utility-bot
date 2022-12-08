@@ -68,7 +68,7 @@ namespace DiscordBot
             var chnl = Context.Guild.CurrentUser.VoiceChannel;
             if (chnl == null) await JoinChnl();
 
-            await _service.PlayAudio();
+            await _service.PlayAudio(song);
 
         }
     

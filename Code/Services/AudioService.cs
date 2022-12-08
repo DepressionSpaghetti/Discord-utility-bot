@@ -10,7 +10,9 @@ using YoutubeExplode.Videos.Streams;
 using System.Net.Http;
 using YoutubeSearchApi.Net.Models.Youtube;
 using YoutubeSearchApi.Net.Services;
-
+using System.Collections.Generic;
+using System.Linq;
+using AngleSharp.Html.Dom;
 
 namespace DiscordBot
 {
@@ -24,6 +26,10 @@ namespace DiscordBot
         }
 
         public static IAudioClient client;
+        public static List<MemoryStream> songQueue = new List<MemoryStream>();
+        public static int queueSize = songQueue.Count - 1;
+        public static int playingIndex = 0;
+        public static int queueIndex = 0;
 
         // Task to join audio channel
         public async Task JoinChannel(IGuild guild, IVoiceChannel channel) 
@@ -50,26 +56,45 @@ namespace DiscordBot
 
         }
 
-        public async Task PlayAudio()
+        public async Task PlayAudio(string name)
         {
-            MemoryStream memoryStream = await GetAudio();
+            await QueueAudio(name);
+            MemoryStream memoryStream = songQueue.ElementAt(playingIndex);
 
             // Play audio
-            using (var discord = client.CreatePCMStream(AudioApplication.Mixed))
+            do
             {
-                try { await discord.WriteAsync(memoryStream.ToArray(), 0, (int)memoryStream.Length); }
-                finally { await discord.FlushAsync(); }
-            }
+                using (var discord = client.CreatePCMStream(AudioApplication.Mixed))
+                {
+                    try { await discord.WriteAsync(memoryStream.ToArray(), 0, (int)memoryStream.Length); }
+                    finally { await discord.FlushAsync(); }
+                }
+
+                // Index of current song increases
+                playingIndex++;
+
+            }while(playingIndex <= queueSize);
+
         }
 
+        public async Task QueueAudio(string name) 
+        {
+            MemoryStream memoryStream = await GetAudioStream(name);
+            
+            songQueue.Add(memoryStream);
 
+
+
+        }
 
         // Get Youtube metadata stream and pipes it to the bot
-        public async Task<MemoryStream> GetAudio(/*string videoLink*/)
+        private async Task<MemoryStream> GetAudioStream(string song)
         {
+            song = await SearchMusic(song);
+
             // Get Youtube audio stream
             YoutubeClient youtube = new YoutubeClient();
-            var streamManifest = await youtube.Videos.Streams.GetManifestAsync("https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+            var streamManifest = await youtube.Videos.Streams.GetManifestAsync(song);
             var streamInfo = streamManifest.GetAudioOnlyStreams().GetWithHighestBitrate();
             var stream = await youtube.Videos.Streams.GetAsync(streamInfo);
 
@@ -84,20 +109,22 @@ namespace DiscordBot
             return memoryStream;
         }
 
-        public async Task SearchMusic()
+        private async Task<string> SearchMusic(string songName)
         {
+            string videoLink = null;
 
             using (var httpClient = new HttpClient())
             {
                 YoutubeSearchClient client = new YoutubeSearchClient(httpClient);
-                var responseObject = await client.SearchAsync("Never gonna give you up");
+                var responseObject = await client.SearchAsync(songName);
                 foreach (YoutubeVideo video in responseObject.Results)
                 {
-                    Console.WriteLine(video.Url);
-                    Console.WriteLine("");
+                    videoLink = video.Url;
                 }
+
             }
 
+            return videoLink;
         }
 
        

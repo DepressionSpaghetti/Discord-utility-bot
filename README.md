@@ -9,5 +9,5 @@ Installation
 * Build the solution
 * Copy the files in Dependencies\vnext_natives_win32_x64 to the folder with your built solution.
 * Copy the ffmpeg folder to your built solution.
-* Edit token.json in your config folder and add the whole folder to your built solution.
+* Edit credentials.json in your config folder and add the whole folder to your built solution.
 * Run the executable file.
