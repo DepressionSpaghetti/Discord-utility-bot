@@ -71,6 +71,13 @@ namespace DiscordBot
             await _service.PlayAudio(song);
 
         }
+
+        [Command("queue", RunMode = RunMode.Async)]
+        [Summary("Queues audio")]
+        public async Task QueueAudio([Remainder] string song)
+        {
+            await QueueAudio(song);
+        }
     
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading.Tasks;
+using System.Threading;
 using Discord;
 using Discord.Audio;
 using CliWrap;
@@ -26,10 +27,12 @@ namespace DiscordBot
         }
 
         public static IAudioClient client;
-        public static List<MemoryStream> songQueue = new List<MemoryStream>();
+        public static List<string> songQueue = new List<string>();
         public static int queueSize = songQueue.Count - 1;
         public static int playingIndex = 0;
         public static int queueIndex = 0;
+        public static bool playing = false;
+        public static bool wait = true;
 
         // Task to join audio channel
         public async Task JoinChannel(IGuild guild, IVoiceChannel channel) 
@@ -56,34 +59,42 @@ namespace DiscordBot
 
         }
 
-        public async Task PlayAudio(string name)
+        public async Task PlayAudio(string name = null)
         {
-            await QueueAudio(name);
-            MemoryStream memoryStream = songQueue.ElementAt(playingIndex);
+
+            if(name != null) await QueueAudio(name);
+
+            MemoryStream memoryStream = await GetAudioStream(songQueue.ElementAt(playingIndex));
 
             // Play audio
-            do
+            using (var discord = client.CreatePCMStream(AudioApplication.Mixed))
             {
-                using (var discord = client.CreatePCMStream(AudioApplication.Mixed))
+                try { await discord.WriteAsync(memoryStream.ToArray(), 0, (int)memoryStream.Length); }
+                finally
                 {
-                    try { await discord.WriteAsync(memoryStream.ToArray(), 0, (int)memoryStream.Length); }
-                    finally { await discord.FlushAsync(); }
+                    //playing = true;
+                    Console.Write("Playing audio");
+                    await discord.FlushAsync();
                 }
+            }
 
-                // Index of current song increases
-                playingIndex++;
+            // Index of current song increases
+            playingIndex++;
 
-            }while(playingIndex <= queueSize);
+            while(wait == true)
+            {
+                await Task.Delay(1);
+            }
 
+            PlayAudio();
         }
 
         public async Task QueueAudio(string name) 
         {
-            MemoryStream memoryStream = await GetAudioStream(name);
-            
-            songQueue.Add(memoryStream);
 
+            songQueue.Add(await SearchMusic(name));
 
+            Console.WriteLine("Audio Queued");
 
         }
 
